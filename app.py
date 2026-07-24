@@ -89,6 +89,19 @@ def format_run(activity: dict) -> dict:
             activity.get("map", {}).get("summary_polyline")
         ),
     }
+    
+def format_shoe(shoe: dict) -> dict:
+    distance_meters = shoe.get("distance", 0)
+
+    return {
+        "id": shoe.get("id"),
+        "name": shoe.get("name", "Unnamed Shoe"),
+        "primary": shoe.get("primary", False),
+        "distance_miles": round(
+            meters_to_miles(distance_meters),
+            1,
+        ),
+    }
 
 
 @app.route("/")
@@ -111,7 +124,42 @@ def home():
             </li>
         </ul>
     """
+@app.route("/shoes")
+def shoe_dashboard():
+    return render_template("shoes.html")
 
+@app.route("/weekly")
+def weekly_dashboard():
+    return render_template("weekly.html")
+
+@app.route("/api/shoes")
+def shoes():
+    try:
+        athlete_data = strava.get_athlete()
+
+        athlete_shoes = athlete_data.get("shoes", [])
+
+        shoes = [
+            format_shoe(shoe)
+            for shoe in athlete_shoes
+        ]
+
+        shoes.sort(
+            key=lambda shoe: shoe["distance_miles"],
+            reverse=True,
+        )
+
+        return jsonify({
+            "success": True,
+            "shoe_count": len(shoes),
+            "shoes": shoes,
+        })
+
+    except requests.exceptions.HTTPError as error:
+        return jsonify({
+            "success": False,
+            "error": error.response.text,
+        }), error.response.status_code
 
 @app.route("/api/athlete")
 def athlete():
@@ -158,6 +206,8 @@ def todays_runs():
             "run_count": len(runs),
             "runs": runs,
         })
+        
+
 
     except requests.exceptions.HTTPError as error:
         return jsonify({
@@ -170,7 +220,98 @@ def todays_runs():
             "success": False,
             "error": f"Could not connect to Strava: {error}",
         }), 500
+@app.route("/api/weekly")
+def weekly_mileage():
+    try:
+        now = datetime.now().astimezone()
 
+        monday = now - timedelta(days=now.weekday())
+        monday = monday.replace(
+            hour=0,
+            minute=0,
+            second=0,
+            microsecond=0,
+        )
 
+        activities = strava.get_activities(
+            after=int(monday.timestamp())
+        )
+
+        running_types = {
+            "Run",
+            "TrailRun",
+            "VirtualRun",
+        }
+
+        runs = [
+            activity
+            for activity in activities
+            if activity.get("sport_type") in running_types
+            or activity.get("type") == "Run"
+        ]
+
+        daily_mileage = {
+            day: 0
+            for day in [
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+                "Sunday",
+            ]
+        }
+
+        for run in runs:
+            start_date = run.get("start_date_local")
+
+            if not start_date:
+                continue
+
+            run_date = datetime.fromisoformat(
+                start_date.replace("Z", "+00:00")
+            )
+
+            day_name = run_date.strftime("%A")
+            distance_miles = meters_to_miles(
+                run.get("distance", 0)
+            )
+
+            daily_mileage[day_name] += distance_miles
+
+        formatted_days = [
+            {
+                "day": day,
+                "miles": round(miles, 2),
+            }
+            for day, miles in daily_mileage.items()
+        ]
+
+        total_miles = sum(
+            day["miles"]
+            for day in formatted_days
+        )
+
+        return jsonify({
+            "success": True,
+            "week_start": monday.strftime("%B %d, %Y"),
+            "total_miles": round(total_miles, 2),
+            "run_count": len(runs),
+            "days": formatted_days,
+        })
+
+    except Exception as error:
+        return jsonify({
+            "success": False,
+            "error": str(error),
+        }), 500
+        
+        
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(
+        host="127.0.0.1",
+        port=5001,
+        debug=True,
+    )
+    

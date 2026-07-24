@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Weekly Mileage</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+    src="{{ url_for('static', filename='js/weekly.js') }}"
+></script>
+</head>
+
+<body>
+    <main class="dashboard">
+        <nav class="dashboard-nav">
+            <a href="/">Today</a>
+            <a href="/weekly" class="active">Weekly</a>
+            <a href="/shoes">Shoes</a>
+        </nav>
+
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">TRAINING SUMMARY</p>
+                <h1>Weekly Mileage</h1>
+            </div>
+
+            <p id="week-start" class="run-date"></p>
+        </header>
+
+        <section id="weekly-container">
+            <p class="status-message">
+                Loading weekly mileage...
+            </p>
+        </section>
+    </main>
+
+    <script
+        src="{{ url_for('static', filename='js/weekly.js') }}"
+    ></script>
+</body>
+</html>
