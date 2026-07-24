@@ -2,21 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>Strava Dashboard</title>
 
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
 </head>
 
 <body>
+    <main class="dashboard">
+        <header class="dashboard-header">
+            <div>
+                <p class="eyebrow">RUNNING OVERVIEW</p>
+                <h1>Today's Runs</h1>
+            </div>
 
-    <h1> Strava Dashboard</h1>
+            <div id="run-date" class="run-date"></div>
+        </header>
 
-    <div id="run-container">
-        Loading today's run...
-    </div>
+        <section id="run-container" class="run-card">
+            <p>Loading today's runs...</p>
+        </section>
+    </main>
 
-    <script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
 
+    <script
+        src="{{ url_for('static', filename='js/dashboard.js') }}"
+    ></script>
 </body>
 </html>
