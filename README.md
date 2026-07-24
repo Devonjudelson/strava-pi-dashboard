@@ -4,12 +4,12 @@ A Raspberry Pi dashboard that displays live running data using the Strava API.
 
 ## Planned Features
 
-- Today's runs
-- Interactive route map
+- Today's run(s)
+- Interactive route map using Open Street Map
 - Weekly mileage
 - Shoe mileage
-- Touchscreen interface
-- Raspberry Pi kiosk mode
+- Touchscreen interface 
+- Raspberry Pi kiosk mode (maybe)
 
 ## Tech Stack
 
