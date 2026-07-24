@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 import requests
-from flask import Flask, jsonify
+from flask import Flask, jsonify, render_template
 
 
 from services.strava_client import StravaClient
@@ -93,7 +93,8 @@ def format_run(activity: dict) -> dict:
 
 @app.route("/")
 def home():
-    return """
+    return render_template("dashboard.html")
+    """return 
         <h1>Strava Dashboard</h1>
         <p>Server is running!</p>
 
