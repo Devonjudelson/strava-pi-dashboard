@@ -3,7 +3,7 @@ from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 import requests
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 
 from services.strava_client import StravaClient
