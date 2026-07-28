@@ -8,16 +8,12 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Weekly Mileage</title>
+    <title>Weekly Mileage | Strava Dashboard</title>
 
     <link
         rel="stylesheet"
         href="{{ url_for('static', filename='css/style.css') }}"
     >
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script
-    src="{{ url_for('static', filename='js/weekly.js') }}"
-></script>
 </head>
 
 <body>
@@ -30,19 +26,77 @@
 
         <header class="dashboard-header">
             <div>
-                <p class="eyebrow">TRAINING SUMMARY</p>
-                <h1>Weekly Mileage</h1>
+                <p
+                    class="eyebrow"
+                    id="chart-eyebrow"
+                >
+                    TRAINING HISTORY
+                </p>
+
+                <h1 id="weekly-chart-title">
+                    Last 10 Weeks
+                </h1>
+
+                <p id="weekly-chart-subtitle">
+                    Select a week to see its daily breakdown.
+                </p>
             </div>
 
-            <p id="week-start" class="run-date"></p>
+            <button
+                type="button"
+                id="back-to-weeks"
+                class="back-to-weeks"
+                hidden
+            >
+                ← All weeks
+            </button>
         </header>
 
-        <section id="weekly-container">
-            <p class="status-message">
+        <section class="run-card">
+            <div
+                id="weekly-summary"
+                class="weekly-summary"
+            >
+                <div>
+                    <span class="metric-label">
+                        10-week average
+                    </span>
+
+                    <strong>--</strong>
+                </div>
+
+                <div>
+                    <span class="metric-label">
+                        Highest week
+                    </span>
+
+                    <strong>--</strong>
+                </div>
+            </div>
+
+            <div class="weekly-chart-wrapper">
+                <canvas
+                    id="weekly-mileage-chart"
+                    aria-label="Weekly mileage chart"
+                    role="img"
+                ></canvas>
+            </div>
+
+            <p
+                id="weekly-status"
+                class="status-message"
+                aria-live="polite"
+            >
                 Loading weekly mileage...
             </p>
         </section>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script
+    src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"
+></script>
 
     <script
         src="{{ url_for('static', filename='js/weekly.js') }}"
