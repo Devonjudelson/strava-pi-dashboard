@@ -451,3 +451,37 @@ h1 {
         padding: 12px;
     }
 }
+
+/* ==========================
+   Raspberry Pi 320x240 Screen
+   ========================== */
+@media (max-width: 320px) {
+
+    body {
+        font-size: 12px;
+        margin: 0;
+        padding: 0;
+    }
+
+    h1 {
+        font-size: 18px;
+    }
+
+    h2 {
+        font-size: 14px;
+    }
+
+    .container {
+        padding: 6px;
+    }
+
+    canvas {
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    button {
+        font-size: 11px;
+        padding: 4px 6px;
+    }
+}
