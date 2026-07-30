@@ -147,6 +147,7 @@ function renderWeeklyHistory(weeks) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
+            animation: false,
             layout: {
     padding: {
         top: 24,

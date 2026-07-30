@@ -452,36 +452,75 @@ h1 {
     }
 }
 
-/* ==========================
-   Raspberry Pi 320x240 Screen
-   ========================== */
-@media (max-width: 320px) {
-
+/* Raspberry Pi 320x240 display */
+@media screen and (max-width: 400px) {
+    html,
     body {
-        font-size: 12px;
+        width: 100%;
+        max-width: 100%;
         margin: 0;
         padding: 0;
+        overflow-x: hidden;
+        font-size: 11px;
+    }
+
+    main,
+    .container,
+    .dashboard-container {
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 3px;
+        box-sizing: border-box;
     }
 
     h1 {
-        font-size: 18px;
+        margin: 2px 0;
+        font-size: 16px;
+        line-height: 1.1;
     }
 
     h2 {
-        font-size: 14px;
+        margin: 2px 0;
+        font-size: 13px;
     }
 
-    .container {
-        padding: 6px;
+    nav {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        gap: 2px;
+        margin: 0;
+        padding: 2px;
     }
 
-    canvas {
-        max-width: 100%;
-        height: auto !important;
+    nav a {
+        padding: 3px 5px;
+        font-size: 10px;
     }
 
-    button {
-        font-size: 11px;
-        padding: 4px 6px;
+    .card,
+    .stat-card {
+        margin: 2px;
+        padding: 4px;
+    }
+}
+
+@media screen and (max-width: 400px) {
+    .weekly-chart-scroll {
+        width: 100%;
+        overflow-x: auto;
+        overflow-y: hidden;
+        touch-action: pan-x;
+    }
+
+    .weekly-chart-inner {
+        width: 520px;
+        height: 165px;
+    }
+
+    .weekly-chart-inner canvas {
+        width: 520px !important;
+        height: 165px !important;
     }
 }
