@@ -43,59 +43,22 @@ async function loadTodayRuns() {
 }
 
 
-function renderCurrentRun() {
-    const container = document.getElementById("run-container");
-    const run = runs[currentRunIndex];
-
-    container.innerHTML = `
-        <div class="run-top-row">
-            <div>
-                <p class="run-label">Today's activity</p>
-                <h2 class="run-name">
-                    ${escapeHtml(run.name || "Run")}
-                </h2>
-            </div>
-
-            <div class="run-position">
-                ${currentRunIndex + 1} of ${runs.length}
-            </div>
+container.innerHTML = `
+    <div class="run-top-row">
+        <div>
+            <p class="run-label">Today's activity</p>
+            <h2 class="run-name">
+                ${escapeHtml(run.name || "Run")}
+            </h2>
         </div>
 
-        <div class="metrics">
-            <div class="metric">
-                <span class="metric-label">Distance</span>
-
-                <span class="metric-value">
-                    ${formatValue(run.distance_miles)}
-                </span>
-
-                <span class="metric-unit">mi</span>
-            </div>
-
-            <div class="metric">
-                <span class="metric-label">Average pace</span>
-
-                <span class="metric-value">
-                    ${escapeHtml(run.pace_per_mile || "—")}
-                </span>
-
-                <span class="metric-unit">/mi</span>
-            </div>
-
-            <div class="metric">
-                <span class="metric-label">Average HR</span>
-
-                <span class="metric-value">
-                    ${run.average_heart_rate ?? "—"}
-                </span>
-
-                <span class="metric-unit">
-                    ${run.average_heart_rate ? "bpm" : ""}
-                </span>
-            </div>
+        <div class="run-position">
+            ${currentRunIndex + 1} of ${runs.length}
         </div>
+    </div>
 
-        <div class="map-wrapper">
+    <div class="run-dashboard-layout">
+        <div class="run-map-panel">
             ${
                 run.route_polyline
                     ? '<div id="route-map"></div>'
@@ -107,39 +70,59 @@ function renderCurrentRun() {
             }
         </div>
 
-        ${
-            runs.length > 1
-                ? `
-                    <div class="run-navigation">
-                        <button
-                            id="previous-run"
-                            class="navigation-button"
-                            type="button"
-                        >
-                            ← Previous
-                        </button>
+        <div class="run-stats-panel">
+            <div class="dashboard-stat">
+                <span class="metric-label">Distance</span>
+                <span class="dashboard-stat-value">
+                    ${formatValue(run.distance_miles)}
+                </span>
+                <span class="metric-unit">mi</span>
+            </div>
 
-                        <button
-                            id="next-run"
-                            class="navigation-button"
-                            type="button"
-                        >
-                            Next →
-                        </button>
-                    </div>
-                `
-                : ""
-        }
-    `;
+            <div class="dashboard-stat">
+                <span class="metric-label">Average pace</span>
+                <span class="dashboard-stat-value">
+                    ${escapeHtml(run.pace_per_mile || "—")}
+                </span>
+                <span class="metric-unit">/mi</span>
+            </div>
 
-    connectNavigationButtons();
+            <div class="dashboard-stat">
+                <span class="metric-label">Average HR</span>
+                <span class="dashboard-stat-value">
+                    ${run.average_heart_rate ?? "—"}
+                </span>
+                <span class="metric-unit">
+                    ${run.average_heart_rate ? "bpm" : ""}
+                </span>
+            </div>
+        </div>
+    </div>
 
-    if (run.route_polyline) {
-        renderMap(run.route_polyline);
-    } else {
-        destroyMap();
+    ${
+        runs.length > 1
+            ? `
+                <div class="run-navigation">
+                    <button
+                        id="previous-run"
+                        class="navigation-button"
+                        type="button"
+                    >
+                        ← Previous
+                    </button>
+
+                    <button
+                        id="next-run"
+                        class="navigation-button"
+                        type="button"
+                    >
+                        Next →
+                    </button>
+                </div>
+            `
+            : ""
     }
-}
+`;
 
 
 function connectNavigationButtons() {
