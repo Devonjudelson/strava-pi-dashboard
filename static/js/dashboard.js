@@ -5,20 +5,28 @@ let routeLayer = null;
 
 
 async function loadTodayRuns() {
-    const container = document.getElementById("run-container");
+    const container =
+        document.getElementById("run-container");
 
     try {
         const response = await fetch("/api/today");
         const data = await response.json();
 
         if (!response.ok || !data.success) {
-            throw new Error(data.error || "Could not load runs.");
+            throw new Error(
+                data.error || "Could not load runs."
+            );
         }
 
-        document.getElementById("run-date").textContent =
-            formatDate(data.date);
+        const runDate =
+            document.getElementById("run-date");
 
-        runs = data.runs;
+        if (runDate) {
+            runDate.textContent =
+                formatDate(data.date);
+        }
+
+        runs = data.runs || [];
 
         if (runs.length === 0) {
             container.innerHTML = `
@@ -26,9 +34,12 @@ async function loadTodayRuns() {
                     No runs recorded today.
                 </p>
             `;
+
+            destroyMap();
             return;
         }
 
+        currentRunIndex = 0;
         renderCurrentRun();
     } catch (error) {
         container.innerHTML = `
@@ -43,86 +54,144 @@ async function loadTodayRuns() {
 }
 
 
-container.innerHTML = `
-    <div class="run-top-row">
-        <div>
-            <p class="run-label">Today's activity</p>
-            <h2 class="run-name">
-                ${escapeHtml(run.name || "Run")}
-            </h2>
-        </div>
+function renderCurrentRun() {
+    const container =
+        document.getElementById("run-container");
 
-        <div class="run-position">
-            ${currentRunIndex + 1} of ${runs.length}
-        </div>
-    </div>
+    const run = runs[currentRunIndex];
 
-    <div class="run-dashboard-layout">
-        <div class="run-map-panel">
+    if (!container || !run) {
+        return;
+    }
+
+    destroyMap();
+
+    container.innerHTML = `
+        <div class="run-top-row">
+            <div>
+                <p class="run-label">
+                    Today's activity
+                </p>
+
+                <h2 class="run-name">
+                    ${escapeHtml(run.name || "Run")}
+                </h2>
+            </div>
+
             ${
-                run.route_polyline
-                    ? '<div id="route-map"></div>'
-                    : `
-                        <div class="no-map">
-                            No route map is available for this run.
+                runs.length > 1
+                    ? `
+                        <div class="run-position">
+                            ${currentRunIndex + 1}
+                            of
+                            ${runs.length}
                         </div>
                     `
+                    : ""
             }
         </div>
 
-        <div class="run-stats-panel">
-            <div class="dashboard-stat">
-                <span class="metric-label">Distance</span>
-                <span class="dashboard-stat-value">
-                    ${formatValue(run.distance_miles)}
-                </span>
-                <span class="metric-unit">mi</span>
+        <div class="run-dashboard-layout">
+            <div class="run-map-panel">
+                ${
+                    run.route_polyline
+                        ? '<div id="route-map"></div>'
+                        : `
+                            <div class="no-map">
+                                No route map is available
+                                for this run.
+                            </div>
+                        `
+                }
             </div>
 
-            <div class="dashboard-stat">
-                <span class="metric-label">Average pace</span>
-                <span class="dashboard-stat-value">
-                    ${escapeHtml(run.pace_per_mile || "—")}
-                </span>
-                <span class="metric-unit">/mi</span>
-            </div>
+            <div class="run-stats-panel">
+                <div class="dashboard-stat">
+                    <span class="metric-label">
+                        Distance
+                    </span>
 
-            <div class="dashboard-stat">
-                <span class="metric-label">Average HR</span>
-                <span class="dashboard-stat-value">
-                    ${run.average_heart_rate ?? "—"}
-                </span>
-                <span class="metric-unit">
-                    ${run.average_heart_rate ? "bpm" : ""}
-                </span>
+                    <span class="dashboard-stat-value">
+                        ${formatValue(
+                            run.distance_miles
+                        )}
+                    </span>
+
+                    <span class="metric-unit">
+                        mi
+                    </span>
+                </div>
+
+                <div class="dashboard-stat">
+                    <span class="metric-label">
+                        Average pace
+                    </span>
+
+                    <span class="dashboard-stat-value">
+                        ${escapeHtml(
+                            run.pace_per_mile || "—"
+                        )}
+                    </span>
+
+                    <span class="metric-unit">
+                        /mi
+                    </span>
+                </div>
+
+                <div class="dashboard-stat">
+                    <span class="metric-label">
+                        Average HR
+                    </span>
+
+                    <span class="dashboard-stat-value">
+                        ${
+                            run.average_heart_rate
+                            ?? "—"
+                        }
+                    </span>
+
+                    <span class="metric-unit">
+                        ${
+                            run.average_heart_rate
+                                ? "bpm"
+                                : ""
+                        }
+                    </span>
+                </div>
             </div>
         </div>
-    </div>
 
-    ${
-        runs.length > 1
-            ? `
-                <div class="run-navigation">
-                    <button
-                        id="previous-run"
-                        class="navigation-button"
-                        type="button"
-                    >
-                        ← Previous
-                    </button>
+        ${
+            runs.length > 1
+                ? `
+                    <div class="run-navigation">
+                        <button
+                            id="previous-run"
+                            class="navigation-button"
+                            type="button"
+                        >
+                            ← Previous
+                        </button>
 
-                    <button
-                        id="next-run"
-                        class="navigation-button"
-                        type="button"
-                    >
-                        Next →
-                    </button>
-                </div>
-            `
-            : ""
+                        <button
+                            id="next-run"
+                            class="navigation-button"
+                            type="button"
+                        >
+                            Next →
+                        </button>
+                    </div>
+                `
+                : ""
+        }
+    `;
+
+    connectNavigationButtons();
+
+    if (run.route_polyline) {
+        renderMap(run.route_polyline);
     }
-`;
+}
 
 
 function connectNavigationButtons() {
@@ -136,26 +205,38 @@ function connectNavigationButtons() {
         return;
     }
 
-    previousButton.addEventListener("click", () => {
-        currentRunIndex =
-            (currentRunIndex - 1 + runs.length) % runs.length;
+    previousButton.addEventListener(
+        "click",
+        () => {
+            currentRunIndex =
+                (
+                    currentRunIndex
+                    - 1
+                    + runs.length
+                ) % runs.length;
 
-        renderCurrentRun();
-    });
+            renderCurrentRun();
+        }
+    );
 
-    nextButton.addEventListener("click", () => {
-        currentRunIndex =
-            (currentRunIndex + 1) % runs.length;
+    nextButton.addEventListener(
+        "click",
+        () => {
+            currentRunIndex =
+                (
+                    currentRunIndex
+                    + 1
+                ) % runs.length;
 
-        renderCurrentRun();
-    });
+            renderCurrentRun();
+        }
+    );
 }
 
 
 function renderMap(encodedPolyline) {
-    destroyMap();
-
-    const routeCoordinates = decodePolyline(encodedPolyline);
+    const routeCoordinates =
+        decodePolyline(encodedPolyline);
 
     if (routeCoordinates.length === 0) {
         return;
@@ -171,51 +252,73 @@ function renderMap(encodedPolyline) {
         {
             maxZoom: 19,
             attribution:
-                '&copy; <a href="https://www.openstreetmap.org/copyright">' +
+                '&copy; ' +
+                '<a href="https://www.openstreetmap.org/copyright">' +
                 "OpenStreetMap</a> contributors"
         }
     ).addTo(map);
 
-    routeLayer = L.polyline(routeCoordinates, {
-        color: "#fc4c02",
-        weight: 5,
-        opacity: 0.95,
-        lineCap: "round",
-        lineJoin: "round"
-    }).addTo(map);
+    routeLayer = L.polyline(
+        routeCoordinates,
+        {
+            color: "#fc4c02",
+            weight: 5,
+            opacity: 0.95,
+            lineCap: "round",
+            lineJoin: "round"
+        }
+    ).addTo(map);
 
-    map.fitBounds(routeLayer.getBounds(), {
-        padding: [28, 28],
-        maxZoom: 16
-    });
+    map.fitBounds(
+        routeLayer.getBounds(),
+        {
+            padding: [20, 20],
+            maxZoom: 16
+        }
+    );
 
-    const startPoint = routeCoordinates[0];
+    const startPoint =
+        routeCoordinates[0];
+
     const endPoint =
-        routeCoordinates[routeCoordinates.length - 1];
+        routeCoordinates[
+            routeCoordinates.length - 1
+        ];
 
-    L.circleMarker(startPoint, {
-        radius: 7,
-        color: "#ffffff",
-        weight: 2,
-        fillColor: "#22c55e",
-        fillOpacity: 1
-    })
+    L.circleMarker(
+        startPoint,
+        {
+            radius: 6,
+            color: "#ffffff",
+            weight: 2,
+            fillColor: "#22c55e",
+            fillOpacity: 1
+        }
+    )
         .addTo(map)
         .bindPopup("Start");
 
-    L.circleMarker(endPoint, {
-        radius: 7,
-        color: "#ffffff",
-        weight: 2,
-        fillColor: "#ef4444",
-        fillOpacity: 1
-    })
+    L.circleMarker(
+        endPoint,
+        {
+            radius: 6,
+            color: "#ffffff",
+            weight: 2,
+            fillColor: "#ef4444",
+            fillOpacity: 1
+        }
+    )
         .addTo(map)
         .bindPopup("Finish");
 
-    window.setTimeout(() => {
-        map.invalidateSize();
-    }, 100);
+    window.setTimeout(
+        () => {
+            if (map) {
+                map.invalidateSize();
+            }
+        },
+        100
+    );
 }
 
 
@@ -228,13 +331,6 @@ function destroyMap() {
 }
 
 
-/*
- * Decodes a Google encoded polyline into:
- * [
- *   [latitude, longitude],
- *   ...
- * ]
- */
 function decodePolyline(encoded) {
     const coordinates = [];
 
@@ -244,13 +340,19 @@ function decodePolyline(encoded) {
 
     while (index < encoded.length) {
         const latitudeResult =
-            decodePolylineValue(encoded, index);
+            decodePolylineValue(
+                encoded,
+                index
+            );
 
         latitude += latitudeResult.value;
         index = latitudeResult.nextIndex;
 
         const longitudeResult =
-            decodePolylineValue(encoded, index);
+            decodePolylineValue(
+                encoded,
+                index
+            );
 
         longitude += longitudeResult.value;
         index = longitudeResult.nextIndex;
@@ -265,19 +367,29 @@ function decodePolyline(encoded) {
 }
 
 
-function decodePolylineValue(encoded, startIndex) {
+function decodePolylineValue(
+    encoded,
+    startIndex
+) {
     let result = 0;
     let shift = 0;
     let index = startIndex;
     let byte;
 
     do {
-        byte = encoded.charCodeAt(index) - 63;
+        byte =
+            encoded.charCodeAt(index) - 63;
+
         index += 1;
 
-        result |= (byte & 0x1f) << shift;
+        result |=
+            (byte & 0x1f) << shift;
+
         shift += 5;
-    } while (byte >= 0x20 && index < encoded.length);
+    } while (
+        byte >= 0x20
+        && index < encoded.length
+    );
 
     const value =
         result & 1
@@ -296,22 +408,36 @@ function formatDate(dateString) {
         return "";
     }
 
-    const date = new Date(`${dateString}T12:00:00`);
+    const date = new Date(
+        `${dateString}T12:00:00`
+    );
 
-    return date.toLocaleDateString("en-US", {
-        weekday: "long",
-        month: "long",
-        day: "numeric"
-    });
+    return date.toLocaleDateString(
+        "en-US",
+        {
+            weekday: "long",
+            month: "long",
+            day: "numeric"
+        }
+    );
 }
 
 
 function formatValue(value) {
-    if (value === null || value === undefined) {
+    if (
+        value === null
+        || value === undefined
+    ) {
         return "—";
     }
 
-    return Number(value).toFixed(2);
+    const number = Number(value);
+
+    if (Number.isNaN(number)) {
+        return "—";
+    }
+
+    return number.toFixed(2);
 }
 
 
